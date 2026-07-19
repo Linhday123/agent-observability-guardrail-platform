@@ -1,0 +1,17 @@
+[project]
+name = "agent-observability-platform"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = []
+
+[dependency-groups]
+generator = [
+    "boto3>=1.43.51",
+    "confluent-kafka>=2.15.0",
+    "faker>=40.31.0",
+    "pandas>=3.0.3",
+    "pyarrow>=25.0.0",
+    "pyyaml>=6.0.3",
+]
