@@ -7,9 +7,18 @@ receivers:
 exporters:
   debug:
     verbosity: detailed
+  awss3:
+    marshaler: otlp_json
+    s3uploader:
+      region: us-east-1
+      s3_bucket: lakehouse
+      s3_prefix: telemetry-landing
+      endpoint: http://minio:9000
+      s3_force_path_style: true
+      disable_ssl: true
 
 service:
   pipelines:
     logs:
       receivers: [otlp]
-      exporters: [debug]
+      exporters: [debug, awss3]
