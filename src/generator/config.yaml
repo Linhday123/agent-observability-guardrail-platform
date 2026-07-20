@@ -1,0 +1,32 @@
+# config.yaml — parameters for the Offline Event Generator.
+# All tunable values live here so the generator behavior can be changed
+# without touching Python code 
+
+generator:
+  random_seed: 42
+  n_agents: 50
+  n_tools: 12
+  n_actions: 40000
+  history_days: 90          # actions are spread across the last N days
+
+skew:
+  # The top `top_tools_count` tools receive `top_tools_share` of all calls
+  top_tools_count: 2
+  top_tools_share: 0.75
+
+schema_evolution:
+  # Rows older than `change_after_days` days are written WITHOUT the
+  # guardrail_policy_version column at all (real file-level schema
+  # evolution, not just null values)
+  new_column: guardrail_policy_version
+  change_after_days: 40
+
+duplicate:
+  # Fraction of rows that get an exact duplicate re-inserted with the
+  # same action_id
+  duplicate_rate: 0.02
+
+minio:
+  endpoint_url: "http://localhost:9000"
+  bucket: lakehouse
+  source_landing_prefix: source-landing
