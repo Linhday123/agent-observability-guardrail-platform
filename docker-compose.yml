@@ -17,6 +17,8 @@ services:
       timeout: 5s
       retries: 5
       start_period: 10s
+    networks:
+      - data-stack-network
 
   postgres:
     image: postgres:15-alpine
@@ -35,6 +37,8 @@ services:
       timeout: 3s
       retries: 5
       start_period: 10s
+    networks:
+      - data-stack-network
 
   otel-collector:
     image: otel/opentelemetry-collector-contrib:0.156.0
@@ -50,7 +54,13 @@ services:
     depends_on:
       minio:
         condition: service_healthy
+    networks:
+      - data-stack-network
 
 volumes:
   minio_data:
   postgres_data:
+
+networks:
+  data-stack-network:
+    external: true
