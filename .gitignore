@@ -12,3 +12,4 @@ __pycache__/
 # Airflow runtime logs (auto-generated, not source)
 logs/airflow/*
 !logs/airflow/.gitkeep
+jars/

@@ -3,16 +3,21 @@ name = "agent-observability-platform"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.11,<3.12"
 dependencies = []
 
 [dependency-groups]
+flink = [
+    "apache-flink==2.0.0",
+    "confluent-kafka>=2.15.0",
+    "pyyaml>=6.0.3",
+]
 generator = [
     "boto3>=1.43.51",
     "confluent-kafka>=2.15.0",
     "faker>=40.31.0",
     "pandas>=3.0.3",
-    "pyarrow>=25.0.0",
+    "pyarrow==16.1.0",
     "pyyaml>=6.0.3",
 ]
 spark = [

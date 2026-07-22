@@ -2,7 +2,7 @@
 
 ## Idea
 OpenTelemetry and the OpenTelemetry Collector are not covered in the EDAI
-curriculum, which satisfies the rubric's Novel Idea condition.
+curriculum, which satisfies the Novel Idea condition.
 This path captures real telemetry generated while Codex is used to work on
 this project, rather than synthetic telemetry produced by a data generator.
 The records are persisted in the same MinIO lakehouse used by the rest of
@@ -32,9 +32,9 @@ capturing what was actually asked.
    confirmed by downloading and inspecting an object stored in MinIO.
    Objects are partitioned by UTC time using a hierarchy similar to
    `year=YYYY/month=MM/day=DD/hour=HH/minute=mm`.
-4. On Day 4, the Source Ingestion Adapter will read this telemetry and
+4. The Source Ingestion Adapter will read this telemetry and
    canonicalize it into Bronze Raw Data alongside the synthetic datasets
-   generated on Day 2.
+   generated upstream.
 
 ## Proof it worked
 ![otel-collector logs](../evidence/opentelemetry/otel_collector_logs.png)

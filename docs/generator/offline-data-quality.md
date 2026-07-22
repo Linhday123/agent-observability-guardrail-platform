@@ -33,7 +33,7 @@ Rows older than 40 days are written to `part-old.parquet` without the
 to `part-recent.parquet` with that column present. This is a genuine
 file-level schema difference, not just null values — `part-old.parquet`
 has 7 columns, `part-recent.parquet` has 8, with `guardrail_policy_version`
-present only in the recent file. Downstream readers (Apache Spark, Day 5)
+present only in the recent file. Downstream readers (Apache Spark)
 must use schema merging to read both files together.
 
 ### Duplicate
@@ -42,6 +42,6 @@ dataset is generated. Measured result: **800 duplicate rows out of 40,800
 total (2.0%)**, matching the configured `duplicate_rate`.
 
 ## Conclusion
-All four data-quality issues required by the rubric are present in the
+All four data-quality issues required are present in the
 generated `agent_action_history` dataset and confirmed by re-reading the
 data back from MinIO, not just from the in-memory generation step.

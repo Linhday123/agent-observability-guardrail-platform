@@ -18,7 +18,7 @@ Feature • DP3 computes `feat_agent_guardrail_violation_rate_7d` (**B6**).
 Real-time Event Generator publishes JSON `agent_events` (**S1**) to Apache
 Kafka • KRaft. Apache Flink consumes the topic (**S2**), processes the
 stream, and outputs to console/log only — **not connected to the Gold
-Model**, per rubric Line 21.
+Model**.
 
 ### Interactive Telemetry Path (Novel Idea 1)
 AI Agent Runtime • IDE • CLI Assistant (Codex in VS Code) exports OTel

@@ -1,0 +1,17 @@
+kafka:
+  broker: localhost:9092
+  topic: agent_events
+
+generator:
+  base_rate_per_sec: 2.0
+  burst:
+    enabled: true
+    every_n_seconds: 20
+    burst_rate_per_sec: 20.0
+    burst_duration_sec: 3
+  late_arrival:
+    late_pct: 0.10
+    delay_min_sec: 30
+    delay_max_sec: 300
+  duplicate:
+    duplicate_pct: 0.015

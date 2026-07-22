@@ -35,5 +35,5 @@ removes many system tools not needed at runtime.
 ![docker compose ps](../evidence/docker-optimization/compose_ps.png)
 ![otel-collector logs](../evidence/docker-optimization/otel_logs.png)
 `minio` and `postgres-gold` are in `healthy` state; `otel-collector` is in
-`Up` state (no healthcheck configured on Day 1) with no configuration errors
+`Up` state (no healthcheck configured) with no configuration errors
 in the logs.
