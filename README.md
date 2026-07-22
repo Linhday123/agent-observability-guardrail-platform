@@ -37,29 +37,60 @@ See the full breakdown in [`docs/architecture/architecture.md`](docs/architectur
 | DP2 | Batch processing — Bronze → Silver → Gold Model |
 | DP3 | Offline feature — Gold Model → Offline Feature |
 | Guardrail | Rules an agent must not violate |
+| SCD2 | Slowly Changing Dimension Type 2 — tracks the full history of a
+dimension's changes over time, instead of overwriting it |
+| Gold Model | The dimensional warehouse (`dim_agent`, `dim_tool`,
+`fact_agent_action`) built in PostgreSQL |
 
 ## Assumptions & Scope
 - Data is controlled synthetic data, except for the Interactive Telemetry
   Path, which uses real data from Codex.
 - The Streaming Pipeline stops at Apache Flink and is not connected to the
   Gold Model.
+- `fact_agent_action.is_violation` is a deterministic, reproducible flag
+  derived from `action_id`, since the underlying source data has no
+  native guardrail-violation signal. This is a documented coursework
+  design assumption.
 
 ## Repo Structure
-```
-src/generator/     — Offline Event Generator 
-infra/otel/         — OpenTelemetry Collector config 
-docs/architecture/  — Architecture diagram + explanation
-docs/engineering/   — Docker / Docker Compose optimization
-docs/evidence/      — Screenshot evidence, organized by topic
-```
+
+src/generator/ — Offline Event Generator
+src/streaming_generator/ — Real-time Event Generator (Kafka producer)
+src/streaming_processing/ — Flink baseline + optimized jobs
+src/batch_processing/ — Spark baseline + optimized jobs
+src/storage_optimization/ — Lakehouse compaction script
+infra/otel/ — OpenTelemetry Collector config
+infra/airflow/ — Airflow custom image + compose
+infra/flink/ — Flink Standalone cluster (JobManager/TaskManager)
+dags/ — Airflow DAGs (DP1, DP2, DP3)
+sql/ — Gold warehouse schema + indexes
+docs/architecture/ — Architecture diagram + explanation
+docs/engineering/ — Docker / Docker Compose optimization
+docs/generator/ — Offline + streaming data quality
+docs/spark/, docs/flink/ — Batch/stream optimization reports
+docs/storage/ — Lakehouse + warehouse optimization
+docs/orchestration/ — Airflow pipeline documentation
+docs/novel-ideas/ — Optional novel idea write-ups
+docs/evidence/ — Screenshot evidence, organized by topic
+
 
 ## Documentation Index
 - [Architecture](docs/architecture/architecture.md)
 - [Docker Optimization](docs/engineering/docker-optimization.md)
+- [Offline Data Quality](docs/generator/offline-data-quality.md)
+- [Streaming Data Quality](docs/generator/streaming-data-quality.md)
+- [Interactive Telemetry Path (Novel Idea)](docs/novel-ideas/opentelemetry.md)
+- [Airflow Pipelines](docs/orchestration/airflow-pipelines.md)
+- [Spark Optimization](docs/spark/optimization-report.md)
+- [Flink Optimization](docs/flink/optimization-report.md)
+- [Storage Optimization](docs/storage/storage-optimization.md)
 
 ## Run Instructions
 ```bash
 cp .env.example .env
+docker network create data-stack-network
 docker compose up -d
+docker compose -f infra/airflow/docker-compose.yml --env-file .env up -d
+docker compose -f infra/flink/docker-compose.yml up -d
 docker compose ps
 ```
