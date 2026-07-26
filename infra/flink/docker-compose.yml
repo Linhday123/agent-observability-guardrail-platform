@@ -1,0 +1,42 @@
+services:
+  jobmanager:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: flink-jobmanager
+    command: jobmanager
+    ports:
+      - "8081:8081"
+    environment:
+      - |
+        FLINK_PROPERTIES=
+        jobmanager.rpc.address: jobmanager
+      - KAFKA_BROKER=kafka:19092
+    volumes:
+      - ../../src/streaming_processing:/opt/flink/usrlib
+      - ../../jars/flink-sql-connector-kafka-4.0.1-2.0.jar:/opt/flink/lib/flink-sql-connector-kafka-4.0.1-2.0.jar
+    networks:
+      - data-stack-network
+
+  taskmanager:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: flink-taskmanager
+    command: taskmanager
+    depends_on:
+      - jobmanager
+    environment:
+      - |
+        FLINK_PROPERTIES=
+        jobmanager.rpc.address: jobmanager
+        taskmanager.numberOfTaskSlots: 4
+    volumes:
+      - ../../src/streaming_processing:/opt/flink/usrlib
+      - ../../jars/flink-sql-connector-kafka-4.0.1-2.0.jar:/opt/flink/lib/flink-sql-connector-kafka-4.0.1-2.0.jar
+    networks:
+      - data-stack-network
+
+networks:
+  data-stack-network:
+    external: true

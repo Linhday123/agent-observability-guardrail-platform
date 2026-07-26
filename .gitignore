@@ -1,0 +1,15 @@
+# Environment variables
+.env
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Operating system
+.DS_Store
+
+# Airflow runtime logs (auto-generated, not source)
+logs/airflow/*
+!logs/airflow/.gitkeep
+jars/

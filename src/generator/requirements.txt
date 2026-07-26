@@ -1,0 +1,6 @@
+faker
+pandas
+pyarrow
+boto3
+pyyaml
+confluent-kafka
