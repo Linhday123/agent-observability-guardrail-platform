@@ -10,7 +10,6 @@ server clock, so the computation remains reproducible for coursework data.
 
 from __future__ import annotations
 
-import os
 from datetime import timedelta
 
 import pendulum
@@ -20,34 +19,18 @@ from airflow.sdk import dag, task
 FEATURE_TABLE = "feat_agent_guardrail_violation_rate_7d"
 
 
-def _required_environment() -> None:
-    """Fail early if PostgreSQL Gold settings are missing."""
-    required = [
-        "POSTGRES_GOLD_HOST",
-        "POSTGRES_GOLD_PORT",
-        "POSTGRES_GOLD_DB",
-        "POSTGRES_GOLD_USER",
-        "POSTGRES_GOLD_PASSWORD",
-    ]
-
-    missing = [name for name in required if not os.getenv(name)]
-
-    if missing:
-        raise RuntimeError(
-            f"Missing required PostgreSQL environment variables: {missing}"
-        )
-
-
 def _postgres_connection():
-    """Open a connection to PostgreSQL Gold Warehouse."""
+    """Open a connection to PostgreSQL Gold Warehouse using the Airflow Connection."""
     import psycopg2
+    from airflow.hooks.base import BaseHook
 
+    conn = BaseHook.get_connection("postgres_gold")
     return psycopg2.connect(
-        host=os.environ["POSTGRES_GOLD_HOST"],
-        port=os.environ["POSTGRES_GOLD_PORT"],
-        dbname=os.environ["POSTGRES_GOLD_DB"],
-        user=os.environ["POSTGRES_GOLD_USER"],
-        password=os.environ["POSTGRES_GOLD_PASSWORD"],
+        host=conn.host,
+        port=conn.port,
+        dbname=conn.schema,
+        user=conn.login,
+        password=conn.password,
     )
 
 
@@ -73,7 +56,6 @@ def dp3_offline_feature():
     )
     def compute_load_offline_feature() -> dict[str, int | float | str]:
         """Compute one seven-day feature snapshot per active agent."""
-        _required_environment()
         connection = _postgres_connection()
 
         try:
@@ -233,7 +215,6 @@ def dp3_offline_feature():
         expected: dict[str, int | float | str],
     ) -> None:
         """Validate DP3 row counts, timestamps and feature constraints."""
-        _required_environment()
         connection = _postgres_connection()
 
         try:

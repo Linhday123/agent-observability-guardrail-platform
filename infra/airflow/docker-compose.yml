@@ -8,18 +8,11 @@ x-airflow-common: &airflow-common
     AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres-airflow:5432/airflow
     AIRFLOW__CORE__LOAD_EXAMPLES: "false"
     AIRFLOW__CORE__AUTH_MANAGER: airflow.providers.fab.auth_manager.fab_auth_manager.FabAuthManager
-    AIRFLOW__CORE__FERNET_KEY: ''
+    AIRFLOW__CORE__FERNET_KEY: ""
     AIRFLOW__CORE__EXECUTION_API_SERVER_URL: http://airflow-api-server:8080/execution/
     AIRFLOW__API_AUTH__JWT_SECRET: ${AIRFLOW_JWT_SECRET}
     MINIO_ENDPOINT: http://minio:9000
     MINIO_BUCKET: lakehouse
-    MINIO_ROOT_USER: ${MINIO_ROOT_USER}
-    MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
-    POSTGRES_GOLD_HOST: postgres
-    POSTGRES_GOLD_PORT: "5432"
-    POSTGRES_GOLD_DB: ${POSTGRES_DB}
-    POSTGRES_GOLD_USER: ${POSTGRES_USER}
-    POSTGRES_GOLD_PASSWORD: ${POSTGRES_PASSWORD}
   volumes:
     - ../../dags:/opt/airflow/dags
     - ../../logs/airflow:/opt/airflow/logs
@@ -56,18 +49,39 @@ services:
       - -c
       - >
         airflow db migrate &&
-        (airflow users create --username airflow --password airflow
-        --firstname Van --lastname Linh --role Admin
+
+        (airflow users create
+        --username airflow
+        --password airflow
+        --firstname Van
+        --lastname Linh
+        --role Admin
         --email airflow@example.com || true) &&
-        (airflow connections add 'minio_default'
-        --conn-type 'generic'
-        --conn-host 'http://minio:9000'
+
+        (airflow connections delete minio_default || true) &&
+
+        airflow connections add minio_default
+        --conn-type generic
+        --conn-host http://minio:9000
         --conn-login "$$MINIO_ROOT_USER"
-        --conn-password "$$MINIO_ROOT_PASSWORD" || true)
+        --conn-password "$$MINIO_ROOT_PASSWORD" &&
+
+        (airflow connections delete postgres_gold || true) &&
+
+        airflow connections add postgres_gold
+        --conn-type postgres
+        --conn-host postgres
+        --conn-schema "$$POSTGRES_DB"
+        --conn-login "$$POSTGRES_USER"
+        --conn-password "$$POSTGRES_PASSWORD"
+        --conn-port 5432
     environment:
       <<: *airflow-common-env
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
 
   airflow-api-server:
     <<: *airflow-common

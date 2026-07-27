@@ -1,7 +1,7 @@
 """DP2: Bronze -> Silver with Spark Local, then Silver -> PostgreSQL Gold.
 
 Task 1:
-- Invokes the optimized Spark job from Day 5.
+- Invokes the optimized batch Spark job (src/batch_processing/batch_optimized.py).
 - Reads Silver Parquet from MinIO.
 - Resolves the correct SCD2 agent_key for every action.
 - Derives a deterministic is_violation flag.
@@ -25,35 +25,21 @@ import pendulum
 from airflow.sdk import dag, task
 
 
-def _required_environment() -> None:
-    """Fail early when a required connection setting is missing."""
-    required = [
-        "MINIO_ENDPOINT",
-        "MINIO_BUCKET",
-        "MINIO_ROOT_USER",
-        "MINIO_ROOT_PASSWORD",
-        "POSTGRES_GOLD_HOST",
-        "POSTGRES_GOLD_PORT",
-        "POSTGRES_GOLD_DB",
-        "POSTGRES_GOLD_USER",
-        "POSTGRES_GOLD_PASSWORD",
-    ]
 
-    missing = [name for name in required if not os.getenv(name)]
-    if missing:
-        raise RuntimeError(f"Missing required environment variables: {missing}")
-
+BUCKET = "lakehouse"
 
 def _s3_client():
-    """Build a boto3 client for MinIO."""
+    """Build a boto3 client for MinIO using the Airflow Connection."""
     import boto3
+    from airflow.hooks.base import BaseHook
     from botocore.config import Config
 
+    conn = BaseHook.get_connection("minio_default")
     return boto3.client(
         "s3",
-        endpoint_url=os.environ["MINIO_ENDPOINT"],
-        aws_access_key_id=os.environ["MINIO_ROOT_USER"],
-        aws_secret_access_key=os.environ["MINIO_ROOT_PASSWORD"],
+        endpoint_url=conn.host,
+        aws_access_key_id=conn.login,
+        aws_secret_access_key=conn.password,
         region_name="us-east-1",
         config=Config(s3={"addressing_style": "path"}),
     )
@@ -65,7 +51,7 @@ def _read_parquet_prefix(prefix: str):
     import pyarrow.parquet as pq
 
     client = _s3_client()
-    bucket = os.environ["MINIO_BUCKET"]
+    bucket = BUCKET
 
     keys: list[str] = []
     paginator = client.get_paginator("list_objects_v2")
@@ -161,15 +147,17 @@ def _nullable_integer(value: Any) -> int | None:
 
 
 def _postgres_connection():
-    """Open a connection to PostgreSQL Gold Warehouse."""
+    """Open PostgreSQL Gold using the Airflow Connection."""
     import psycopg2
+    from airflow.hooks.base import BaseHook
 
+    conn = BaseHook.get_connection("postgres_gold")
     return psycopg2.connect(
-        host=os.environ["POSTGRES_GOLD_HOST"],
-        port=os.environ["POSTGRES_GOLD_PORT"],
-        dbname=os.environ["POSTGRES_GOLD_DB"],
-        user=os.environ["POSTGRES_GOLD_USER"],
-        password=os.environ["POSTGRES_GOLD_PASSWORD"],
+        host=conn.host,
+        port=conn.port,
+        dbname=conn.schema,
+        user=conn.login,
+        password=conn.password,
     )
 
 
@@ -198,7 +186,6 @@ def dp2_silver_gold():
         import pandas as pd
         from psycopg2.extras import execute_values
 
-        _required_environment()
 
         spark_command = [
             "python",

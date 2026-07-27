@@ -1,7 +1,6 @@
 # Storage Optimization
 
-This document covers the two storage optimization requirements completed
-on Day 7:
+This document covers the two storage optimization requirements: Lakehouse compaction and Data Warehouse indexing.
 
 - Lakehouse file compaction on MinIO.
 - PostgreSQL Gold Warehouse indexing with before-and-after execution

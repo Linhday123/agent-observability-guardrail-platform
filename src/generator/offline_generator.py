@@ -209,7 +209,7 @@ def generate_agent_action_history(
 def apply_duplicates(config: GeneratorConfig, df: pd.DataFrame) -> pd.DataFrame:
     """Re-insert an exact copy of `duplicate_rate` of rows, keeping the
     same action_id, to simulate at-least-once delivery duplicates
-    (Rubric Line 8).
+    (record duplication).
     """
     n_dupes = int(len(df) * config.duplicate_rate)
     dupes = df.sample(n=n_dupes, random_state=config.random_seed).copy()
@@ -244,7 +244,7 @@ def write_source_landing(
     agent_action_history is split into two files by `called_at`:
     the "old" file (older than schema_change_after_days) is written
     WITHOUT the guardrail_policy_version column, producing genuine
-    file-level schema evolution for DP2 (Spark) to handle on Day 5.
+    file-level schema evolution for the Batch Data Pipeline (DP2 / Apache Spark) to handle via mergeSchema.
     """
     prefix = config.minio_source_landing_prefix
     bucket = config.minio_bucket

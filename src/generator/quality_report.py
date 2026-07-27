@@ -36,7 +36,7 @@ def _download_parquet(client, bucket: str, key: str) -> pd.DataFrame:
 
 
 def report_skew(actions: pd.DataFrame) -> None:
-    """Print the share of calls owned by the top 2 tools (Rubric Line 5)."""
+    """Print the share of calls owned by the top 2 tools (data skew)."""
     counts = actions["tool_id"].value_counts(normalize=True)
     top2_share = counts.head(2).sum()
     print("\n[Skew] Top 2 tools' share of total calls:")
@@ -45,7 +45,7 @@ def report_skew(actions: pd.DataFrame) -> None:
 
 
 def report_cardinality(actions: pd.DataFrame) -> None:
-    """Print uniqueness ratio of action_id / run_id (Rubric Line 6)."""
+    """Print uniqueness ratio of action_id / run_id (high cardinality)."""
     n = len(actions)
     n_unique_action = actions["action_id"].nunique()
     n_unique_run = actions["run_id"].nunique()
@@ -56,7 +56,7 @@ def report_cardinality(actions: pd.DataFrame) -> None:
 
 def report_schema_evolution(old: pd.DataFrame, recent: pd.DataFrame) -> None:
     """Print the column-set difference between the old and recent
-    partitions of agent_action_history (Rubric Line 7)."""
+    partitions of agent_action_history (schema evolution)."""
     print("\n[Schema evolution] Column comparison between partitions:")
     print(f"  part-old.parquet columns:    {sorted(old.columns)}")
     print(f"  part-recent.parquet columns: {sorted(recent.columns)}")
@@ -65,7 +65,7 @@ def report_schema_evolution(old: pd.DataFrame, recent: pd.DataFrame) -> None:
 
 
 def report_duplicates(actions: pd.DataFrame) -> None:
-    """Print the duplicate rate of action_id (Rubric Line 8)."""
+    """Print the duplicate rate of action_id (record duplication)."""
     n = len(actions)
     n_unique = actions["action_id"].nunique()
     dup_count = n - n_unique
